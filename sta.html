@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width; initial-scale=1.0; maximum-scale=1.0; minimum-scale=1.0; user-scalable=no;"/>
+    <title></title>
+    <script>
+
+        (function() {
+            var c = [
+                {
+                    name: '大自然的搬运工',
+                    isHalf: 0
+                },
+                {
+                    name: '一想到你呀',
+                    isHalf: 0
+                },
+                {
+                    name: '吹比小能手',
+                    isHalf: 0
+                },
+                {
+                    name: '笑点很奇怪',
+                    isHalf: 0
+                },
+                {
+                    name: '八卦来了',
+                    isHalf: 1
+                },
+                {
+                    name: '我们爱造句',
+                    isHalf: 0
+                },
+                {
+                    name: '地铁3号线',
+                    isHalf: 0
+                },
+                {
+                    name: '败家女人帮',
+                    isHalf: 1
+                },
+                {
+                    name: '搞笑图片',
+                    isHalf: 0
+                },
+                {
+                    name: '有个群组',
+                    isHalf: 0
+                },
+                {
+                    name: '家有熊孩子',
+                    isHalf: 1
+                },
+                {
+                    name: '强迫症研究中心',
+                    isHalf: 1
+                },
+                {
+                    name: '南京萌宠乐园',
+                    isHalf: 1
+                },
+                {
+                    name: '春夏秋冬',
+                    isHalf: 0
+                },
+                {
+                    name: '二逼青年欢乐多',
+                    isHalf: 1
+                },
+                {
+                    name: '长得好的都进来',
+                    isHalf: 0
+                },
+                {
+                    name: '那些年追过的海贼王',
+                    isHalf: 0
+                }
+            ];
+            var hasExports = !!(typeof module !== 'undefined' && module.exports);
+            if (hasExports) {
+                module.exports = c;
+            } else if (window) {
+                window.config = c;
+            }
+        })();
+
+        window.onload = function() {
+            var content = document.getElementById("content");
+            var config = window.config;
+
+            function updateContent(c) {
+                if (Array.isArray(c)) {
+                    var tmpl = '<ul>';
+                    tmpl += "<li>" + new Date() + "</li>";
+                    c.forEach(function(a) {
+                        tmpl += "<li>" + a + "</li>";
+                    });
+                    tmpl += "</ul>";
+                    content.innerHTML = tmpl;
+                } else {
+                    content.innerHTML = c;
+                }
+            }
+
+            var url_patt = "http://i.baoz.cn/rest/object/get.@.stat";
+
+            function define(a) {
+                return a;
+            }
+
+            function http(url) {
+                var xhr = new XMLHttpRequest();
+                xhr.open("get", url, false);
+                xhr.send();
+                if (+xhr.responseText === 404)
+                    return false;
+                return xhr.responseText;
+            }
+
+            var len = config.length;
+            var res = config.map(function(g) {
+
+                var u = url_patt.replace("@", g.name);
+                u = eval(http(u));
+                if (u.groupstat['1month']) {
+                    u = u.groupstat['1month'][0];
+                    if (g.isHalf) {
+                        u['group-heat'] = Math.round(u['group-heat'] / 2);
+                    }
+                    u['name'] = g.name;
+                }
+                len--;
+                return u;
+            });
+
+            res.sort(function(a, b) {
+                a = +a['group-heat'];
+                b = +b['group-heat'];
+
+                if (a > b) {
+                    return -1;
+                }
+                if (a < b) {
+                    return 1;
+                }
+                return 0;
+            });
+
+            res = res.map(function(a) {
+                return a.name + ": " + a['group-heat'];
+            });
+
+            updateContent(res);
+        };
+    </script>
+</head>
+<body>
+<div id="content"></div>
+</body>
+</html>
